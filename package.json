@@ -1,0 +1,29 @@
+{
+  "name": "ai-face-swapper",
+  "version": "1.0.0",
+  "description": "AI Face Swapper with Chat System",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:chat": "node chat-server.js",
+    "dev": "concurrently \"npm run start\" \"npm run start:chat\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.21.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.15.6",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "axios": "^1.9.0",
+    "colors": "^1.4.0",
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22"
+  }
+}
