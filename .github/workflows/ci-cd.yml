@@ -86,7 +86,7 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd mongosh\ --eval\ \"db.runCommand\(\{\ ping:\ 1\ \}\)\"
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -102,7 +102,6 @@ jobs:
       
       - name: Restore cached dependencies
         uses: actions/cache@v4
-        id: npm-cache
         with:
           path: |
             **/node_modules
@@ -156,7 +155,6 @@ jobs:
       
       - name: Restore cached dependencies
         uses: actions/cache@v4
-        id: npm-cache
         with:
           path: |
             **/node_modules
@@ -229,18 +227,18 @@ jobs:
           procfile: "web: npm start"
           healthcheck: "https://property-mapping-staging.herokuapp.com/api/health"
           rollbackonhealthcheckfailed: true
-        env:
-          HD_NODE_ENV: staging
-          HD_DB_USER: ${{ secrets.STAGING_DB_USER }}
-          HD_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          HD_DB_HOST: ${{ secrets.STAGING_DB_HOST }}
-          HD_DB_PORT: ${{ secrets.STAGING_DB_PORT }}
-          HD_DB_NAME: ${{ secrets.STAGING_DB_NAME }}
-          HD_MONGO_URI: ${{ secrets.STAGING_MONGO_URI }}
-          HD_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
-          HD_JWT_EXPIRE: 7d
-          HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
-          HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+      env:
+        HD_NODE_ENV: staging
+        HD_DB_USER: ${{ secrets.STAGING_DB_USER }}
+        HD_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        HD_DB_HOST: ${{ secrets.STAGING_DB_HOST }}
+        HD_DB_PORT: ${{ secrets.STAGING_DB_PORT }}
+        HD_DB_NAME: ${{ secrets.STAGING_DB_NAME }}
+        HD_MONGO_URI: ${{ secrets.STAGING_MONGO_URI }}
+        HD_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+        HD_JWT_EXPIRE: 7d
+        HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
+        HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
       
       - name: Run Database Migrations
         run: |
@@ -250,14 +248,14 @@ jobs:
       
       - name: Notify Slack on Success
         if: success()
-        uses: rtCamp/action-slack-notify@v3
+        uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: deployments
           SLACK_COLOR: good
           SLACK_TITLE: Staging Deployment Successful
-          SLACK_MESSAGE: Property Mapping app has been successfully deployed to staging environment
-          SLACK_FOOTER: GitHub Actions CI/CD
+          SLACK_MESSAGE: 'Property Mapping app has been successfully deployed to staging environment'
+          SLACK_FOOTER: 'GitHub Actions CI/CD'
 
   deploy-production:
     name: Deploy to Production
@@ -296,23 +294,23 @@ jobs:
           procfile: "web: npm start"
           healthcheck: "https://property-mapping-production.herokuapp.com/api/health"
           rollbackonhealthcheckfailed: true
-        env:
-          HD_NODE_ENV: production
-          HD_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
-          HD_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
-          HD_DB_HOST: ${{ secrets.PRODUCTION_DB_HOST }}
-          HD_DB_PORT: ${{ secrets.PRODUCTION_DB_PORT }}
-          HD_DB_NAME: ${{ secrets.PRODUCTION_DB_NAME }}
-          HD_MONGO_URI: ${{ secrets.PRODUCTION_MONGO_URI }}
-          HD_JWT_SECRET: ${{ secrets.PRODUCTION_JWT_SECRET }}
-          HD_JWT_EXPIRE: 7d
-          HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
-          HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+      env:
+        HD_NODE_ENV: production
+        HD_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+        HD_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+        HD_DB_HOST: ${{ secrets.PRODUCTION_DB_HOST }}
+        HD_DB_PORT: ${{ secrets.PRODUCTION_DB_PORT }}
+        HD_DB_NAME: ${{ secrets.PRODUCTION_DB_NAME }}
+        HD_MONGO_URI: ${{ secrets.PRODUCTION_MONGO_URI }}
+        HD_JWT_SECRET: ${{ secrets.PRODUCTION_JWT_SECRET }}
+        HD_JWT_EXPIRE: 7d
+        HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
+        HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
       
       - name: Run Database Migrations
-        run: |
-          curl -X POST https://property-mapping-production.herokuapp.com/api/admin/run-migrations \
-          -H "Authorization: Bearer ${{ secrets.MIGRATION_API_KEY }}" \
+        run: >
+          curl -X POST https://property-mapping-production.herokuapp.com/api/admin/run-migrations
+          -H "Authorization: Bearer ${{ secrets.MIGRATION_API_KEY }}"
           -H "Content-Type: application/json"
       
       - name: Create GitHub Release
@@ -333,11 +331,11 @@ jobs:
       
       - name: Notify Slack on Success
         if: success()
-        uses: rtCamp/action-slack-notify@v3
+        uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: deployments
           SLACK_COLOR: good
           SLACK_TITLE: Production Deployment Successful
-          SLACK_MESSAGE: Property Mapping app has been successfully deployed to production environment
-          SLACK_FOOTER: GitHub Actions CI/CD
+          SLACK_MESSAGE: 'Property Mapping app has been successfully deployed to production environment'
+          SLACK_FOOTER: 'GitHub Actions CI/CD'
