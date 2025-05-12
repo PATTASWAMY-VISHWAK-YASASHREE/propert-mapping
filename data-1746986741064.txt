@@ -1,0 +1,1867 @@
+2025-05-11 17:34:03 IST LOG:  database system was shut down at 2025-05-11 01:25:32 IST
+2025-05-11 17:39:03 IST LOG:  checkpoint starting: time
+2025-05-11 17:39:03 IST LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.450 s, sync=0.002 s, total=0.462 s; sync files=3, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/2F94A80, redo lsn=0/2F94A28
+2025-05-11 17:59:04 IST ERROR:  column "name" of relation "users" does not exist at character 50
+2025-05-11 17:59:04 IST STATEMENT:  
+	            INSERT INTO users (
+	                name, email, password, role, created_at, updated_at
+	            ) VALUES (
+	                'Admin User', 'admin@example.com', '$2a$10$OMUm5USVGFCnVPSQSOCvxOyVGQJ6HQT0c.OyVJgBzNXpuMRoQ7tIu', 'admin', NOW(), NOW()
+	            ) ON CONFLICT (email) DO NOTHING
+	        
+2025-05-11 18:04:03 IST LOG:  checkpoint starting: time
+2025-05-11 18:04:05 IST LOG:  checkpoint complete: wrote 13 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.430 s, sync=0.014 s, total=1.468 s; sync files=7, longest=0.004 s, average=0.002 s; distance=22 kB, estimate=22 kB; lsn=0/2F9A318, redo lsn=0/2F9A2C0
+2025-05-11 18:06:30 IST ERROR:  value too long for type character varying(20)
+2025-05-11 18:06:30 IST STATEMENT:  
+	                INSERT INTO owners (
+	                    id, name, email, phone, address, owner_type, company_id, created_at, updated_at
+	                ) VALUES (
+	                    '594f3f0b-1d7f-4dbe-af86-fc2c82610804'::uuid, 'Nicholas Garza', 'reneeferguson@example.com', '001-518-973-2218x67478', '007 Alice Villages, Westchester, MP 71828', 'Company', '079d3e94-98f1-418b-aa54-75b88ccd8fb6'::uuid, NOW(), NOW()
+	                )
+	            
+2025-05-11 18:09:03 IST LOG:  checkpoint starting: time
+2025-05-11 18:09:08 IST LOG:  checkpoint complete: wrote 52 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=5.600 s, sync=0.008 s, total=5.618 s; sync files=31, longest=0.001 s, average=0.001 s; distance=86 kB, estimate=86 kB; lsn=0/2FAFBC0, redo lsn=0/2FAFB30
+2025-05-11 18:14:03 IST LOG:  checkpoint starting: time
+2025-05-11 18:14:04 IST LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.089 s, sync=0.003 s, total=1.099 s; sync files=8, longest=0.001 s, average=0.001 s; distance=5 kB, estimate=78 kB; lsn=0/2FB12E0, redo lsn=0/2FB1288
+2025-05-11 18:16:55 IST ERROR:  syntax error at or near "owners" at character 62
+2025-05-11 18:16:55 IST STATEMENT:  SELECT p.address, o.name as owner_name FROM properties pJOIN owners o ON p.owner_id = o.id;
+2025-05-11 18:16:55 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 18:17:08 IST ERROR:  syntax error at or near "properties" at character 122
+2025-05-11 18:17:08 IST STATEMENT:  SELECT     p.address,     p.city,     p.state,     p.value,     o.name as owner_name,     o.email as owner_emailFROM     properties pLEFT JOIN     owners o ON p.owner_id = o.idORDER BY     p.value DESC;
+2025-05-11 18:20:15 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 18:20:26 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 18:23:50 IST ERROR:  syntax error at or near "public" at character 121
+2025-05-11 18:23:50 IST STATEMENT:  SELECT     p.address,     p.city,     p.state,     p.value,     o.name as owner_name,     o.email as owner_emailFROM    public  pLEFT JOIN     owners o ON p.owner_id = o.idORDER BY     p.value DESC;
+2025-05-11 18:24:04 IST ERROR:  syntax error at or near ""public"" at character 121
+2025-05-11 18:24:04 IST STATEMENT:  SELECT     p.address,     p.city,     p.state,     p.value,     o.name as owner_name,     o.email as owner_emailFROM    "public"  pLEFT JOIN     owners o ON p.owner_id = o.idORDER BY     p.value DESC;
+2025-05-11 18:34:59 IST ERROR:  function update_updated_at_column() does not exist
+2025-05-11 18:34:59 IST STATEMENT:  -- Chat System Migration for Property Mapping Platform
+	-- This migration adds tables for a Discord-like chat system
+	
+	-- Chat Servers (one per company)
+	CREATE TABLE IF NOT EXISTS chat_servers (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+	    name VARCHAR(100) NOT NULL,
+	    description TEXT,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    UNIQUE(company_id)
+	);
+	
+	-- Chat Channels (multiple per server)
+	CREATE TABLE IF NOT EXISTS chat_channels (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    server_id UUID NOT NULL REFERENCES chat_servers(id) ON DELETE CASCADE,
+	    name VARCHAR(100) NOT NULL,
+	    description TEXT,
+	    is_private BOOLEAN NOT NULL DEFAULT FALSE,
+	    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+	    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    UNIQUE(server_id, name)
+	);
+	
+	-- Channel Members (for private channels)
+	CREATE TABLE IF NOT EXISTS channel_members (
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    PRIMARY KEY (channel_id, user_id)
+	);
+	
+	-- Server Roles
+	CREATE TABLE IF NOT EXISTS server_roles (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    server_id UUID NOT NULL REFERENCES chat_servers(id) ON DELETE CASCADE,
+	    name VARCHAR(100) NOT NULL,
+	    color VARCHAR(7),
+	    permissions JSONB NOT NULL DEFAULT '{}',
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    UNIQUE(server_id, name)
+	);
+	
+	-- User Roles (many-to-many relationship)
+	CREATE TABLE IF NOT EXISTS user_roles (
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    role_id UUID NOT NULL REFERENCES server_roles(id) ON DELETE CASCADE,
+	    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+	    PRIMARY KEY (user_id, role_id)
+	);
+	
+	-- Messages
+	CREATE TABLE IF NOT EXISTS messages (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    content TEXT NOT NULL,
+	    is_edited BOOLEAN NOT NULL DEFAULT FALSE,
+	    is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
+	    parent_id UUID REFERENCES messages(id) ON DELETE SET NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Message Attachments
+	CREATE TABLE IF NOT EXISTS message_attachments (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+	    file_name VARCHAR(255) NOT NULL,
+	    file_type VARCHAR(100) NOT NULL,
+	    file_size INTEGER NOT NULL,
+	    file_url VARCHAR(255) NOT NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Message Reactions
+	CREATE TABLE IF NOT EXISTS message_reactions (
+	    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    emoji VARCHAR(50) NOT NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    PRIMARY KEY (message_id, user_id, emoji)
+	);
+	
+	-- User Presence Status
+	CREATE TABLE IF NOT EXISTS user_presence (
+	    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+	    status VARCHAR(20) NOT NULL DEFAULT 'offline',
+	    last_active TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Read Receipts
+	CREATE TABLE IF NOT EXISTS read_receipts (
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    last_read_message_id UUID REFERENCES messages(id) ON DELETE SET NULL,
+	    last_read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    PRIMARY KEY (channel_id, user_id)
+	);
+	
+	-- Direct Message Channels
+	CREATE TABLE IF NOT EXISTS direct_message_channels (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Direct Message Participants
+	CREATE TABLE IF NOT EXISTS direct_message_participants (
+	    channel_id UUID NOT NULL REFERENCES direct_message_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    PRIMARY KEY (channel_id, user_id)
+	);
+	
+	-- Direct Messages
+	CREATE TABLE IF NOT EXISTS direct_messages (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    channel_id UUID NOT NULL REFERENCES direct_message_channels(id) ON DELETE CASCADE,
+	    sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    content TEXT NOT NULL,
+	    is_edited BOOLEAN NOT NULL DEFAULT FALSE,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Notifications
+	CREATE TABLE IF NOT EXISTS notifications (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    type VARCHAR(50) NOT NULL,
+	    content TEXT NOT NULL,
+	    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+	    reference_id UUID,
+	    reference_type VARCHAR(50),
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- User Channel Settings
+	CREATE TABLE IF NOT EXISTS user_channel_settings (
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    muted BOOLEAN NOT NULL DEFAULT FALSE,
+	    notification_preference VARCHAR(20) NOT NULL DEFAULT 'all',
+	    PRIMARY KEY (user_id, channel_id)
+	);
+	
+	-- Create indexes for performance
+	CREATE INDEX idx_messages_channel_id ON messages(channel_id);
+	CREATE INDEX idx_messages_user_id ON messages(user_id);
+	CREATE INDEX idx_messages_created_at ON messages(created_at);
+	CREATE INDEX idx_channel_members_user_id ON channel_members(user_id);
+	CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+	CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
+	CREATE INDEX idx_direct_message_participants_user_id ON direct_message_participants(user_id);
+	CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+	CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+	
+	-- Create triggers for updated_at timestamps
+	CREATE TRIGGER update_chat_servers_updated_at
+	BEFORE UPDATE ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_chat_channels_updated_at
+	BEFORE UPDATE ON chat_channels
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_server_roles_updated_at
+	BEFORE UPDATE ON server_roles
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_messages_updated_at
+	BEFORE UPDATE ON messages
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_user_presence_updated_at
+	BEFORE UPDATE ON user_presence
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_direct_messages_updated_at
+	BEFORE UPDATE ON direct_messages
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	-- Create default admin role function
+	CREATE OR REPLACE FUNCTION create_default_chat_server()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	    -- Create a chat server for the company
+	    INSERT INTO chat_servers (company_id, name, description)
+	    VALUES (NEW.id, NEW.name || ' Chat Server', 'Company chat server for ' || NEW.name);
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to create chat server when a company is created
+	CREATE TRIGGER create_company_chat_server
+	AFTER INSERT ON companies
+	FOR EACH ROW EXECUTE FUNCTION create_default_chat_server();
+	
+	-- Function to create default channels when a server is created
+	CREATE OR REPLACE FUNCTION create_default_channels()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	    -- Create general channel
+	    INSERT INTO chat_channels (server_id, name, description)
+	    VALUES (NEW.id, 'general', 'General discussion');
+	    
+	    -- Create announcements channel
+	    INSERT INTO chat_channels (server_id, name, description)
+	    VALUES (NEW.id, 'announcements', 'Company announcements');
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to create default channels when a server is created
+	CREATE TRIGGER create_server_default_channels
+	AFTER INSERT ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION create_default_channels();
+	
+	-- Function to create default roles when a server is created
+	CREATE OR REPLACE FUNCTION create_default_roles()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	    -- Create admin role
+	    INSERT INTO server_roles (server_id, name, color, permissions)
+	    VALUES (NEW.id, 'Admin', '#FF0000', '{"manage_channels": true, "manage_roles": true, "manage_messages": true, "manage_server": true}');
+	    
+	    -- Create moderator role
+	    INSERT INTO server_roles (server_id, name, color, permissions)
+	    VALUES (NEW.id, 'Moderator', '#00FF00', '{"manage_messages": true, "pin_messages": true}');
+	    
+	    -- Create member role
+	    INSERT INTO server_roles (server_id, name, color, permissions)
+	    VALUES (NEW.id, 'Member', '#0000FF', '{"send_messages": true, "read_messages": true}');
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to create default roles when a server is created
+	CREATE TRIGGER create_server_default_roles
+	AFTER INSERT ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION create_default_roles();
+	
+	-- Function to assign company admin to admin role
+	CREATE OR REPLACE FUNCTION assign_company_admin_role()
+	RETURNS TRIGGER AS $$
+	DECLARE
+	    admin_user_id UUID;
+	    admin_role_id UUID;
+	BEGIN
+	    -- Find the company admin user
+	    SELECT id INTO admin_user_id FROM users WHERE company_id = NEW.company_id AND role = 'admin' LIMIT 1;
+	    
+	    -- Find the admin role for this server
+	    SELECT id INTO admin_role_id FROM server_roles WHERE server_id = NEW.id AND name = 'Admin' LIMIT 1;
+	    
+	    -- Assign admin role to company admin if both exist
+	    IF admin_user_id IS NOT NULL AND admin_role_id IS NOT NULL THEN
+	        INSERT INTO user_roles (user_id, role_id, assigned_by)
+	        VALUES (admin_user_id, admin_role_id, admin_user_id);
+	    END IF;
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to assign company admin to admin role when a server is created
+	CREATE TRIGGER assign_server_admin_role
+	AFTER INSERT ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION assign_company_admin_role();
+2025-05-11 18:36:27 IST ERROR:  function update_updated_at_column() does not exist
+2025-05-11 18:36:27 IST STATEMENT:  -- Chat System Migration for Property Mapping Platform
+	-- This migration adds tables for a Discord-like chat system
+	
+	-- Chat Servers (one per company)
+	CREATE TABLE IF NOT EXISTS chat_servers (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+	    name VARCHAR(100) NOT NULL,
+	    description TEXT,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    UNIQUE(company_id)
+	);
+	
+	-- Chat Channels (multiple per server)
+	CREATE TABLE IF NOT EXISTS chat_channels (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    server_id UUID NOT NULL REFERENCES chat_servers(id) ON DELETE CASCADE,
+	    name VARCHAR(100) NOT NULL,
+	    description TEXT,
+	    is_private BOOLEAN NOT NULL DEFAULT FALSE,
+	    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+	    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    UNIQUE(server_id, name)
+	);
+	
+	-- Channel Members (for private channels)
+	CREATE TABLE IF NOT EXISTS channel_members (
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    PRIMARY KEY (channel_id, user_id)
+	);
+	
+	-- Server Roles
+	CREATE TABLE IF NOT EXISTS server_roles (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    server_id UUID NOT NULL REFERENCES chat_servers(id) ON DELETE CASCADE,
+	    name VARCHAR(100) NOT NULL,
+	    color VARCHAR(7),
+	    permissions JSONB NOT NULL DEFAULT '{}',
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    UNIQUE(server_id, name)
+	);
+	
+	-- User Roles (many-to-many relationship)
+	CREATE TABLE IF NOT EXISTS user_roles (
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    role_id UUID NOT NULL REFERENCES server_roles(id) ON DELETE CASCADE,
+	    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+	    PRIMARY KEY (user_id, role_id)
+	);
+	
+	-- Messages
+	CREATE TABLE IF NOT EXISTS messages (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    content TEXT NOT NULL,
+	    is_edited BOOLEAN NOT NULL DEFAULT FALSE,
+	    is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
+	    parent_id UUID REFERENCES messages(id) ON DELETE SET NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Message Attachments
+	CREATE TABLE IF NOT EXISTS message_attachments (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+	    file_name VARCHAR(255) NOT NULL,
+	    file_type VARCHAR(100) NOT NULL,
+	    file_size INTEGER NOT NULL,
+	    file_url VARCHAR(255) NOT NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Message Reactions
+	CREATE TABLE IF NOT EXISTS message_reactions (
+	    message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    emoji VARCHAR(50) NOT NULL,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    PRIMARY KEY (message_id, user_id, emoji)
+	);
+	
+	-- User Presence Status
+	CREATE TABLE IF NOT EXISTS user_presence (
+	    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+	    status VARCHAR(20) NOT NULL DEFAULT 'offline',
+	    last_active TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Read Receipts
+	CREATE TABLE IF NOT EXISTS read_receipts (
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    last_read_message_id UUID REFERENCES messages(id) ON DELETE SET NULL,
+	    last_read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    PRIMARY KEY (channel_id, user_id)
+	);
+	
+	-- Direct Message Channels
+	CREATE TABLE IF NOT EXISTS direct_message_channels (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Direct Message Participants
+	CREATE TABLE IF NOT EXISTS direct_message_participants (
+	    channel_id UUID NOT NULL REFERENCES direct_message_channels(id) ON DELETE CASCADE,
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    PRIMARY KEY (channel_id, user_id)
+	);
+	
+	-- Direct Messages
+	CREATE TABLE IF NOT EXISTS direct_messages (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    channel_id UUID NOT NULL REFERENCES direct_message_channels(id) ON DELETE CASCADE,
+	    sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    content TEXT NOT NULL,
+	    is_edited BOOLEAN NOT NULL DEFAULT FALSE,
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- Notifications
+	CREATE TABLE IF NOT EXISTS notifications (
+	    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    type VARCHAR(50) NOT NULL,
+	    content TEXT NOT NULL,
+	    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+	    reference_id UUID,
+	    reference_type VARCHAR(50),
+	    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	
+	-- User Channel Settings
+	CREATE TABLE IF NOT EXISTS user_channel_settings (
+	    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	    channel_id UUID NOT NULL REFERENCES chat_channels(id) ON DELETE CASCADE,
+	    muted BOOLEAN NOT NULL DEFAULT FALSE,
+	    notification_preference VARCHAR(20) NOT NULL DEFAULT 'all',
+	    PRIMARY KEY (user_id, channel_id)
+	);
+	
+	-- Create indexes for performance
+	CREATE INDEX idx_messages_channel_id ON messages(channel_id);
+	CREATE INDEX idx_messages_user_id ON messages(user_id);
+	CREATE INDEX idx_messages_created_at ON messages(created_at);
+	CREATE INDEX idx_channel_members_user_id ON channel_members(user_id);
+	CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+	CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
+	CREATE INDEX idx_direct_message_participants_user_id ON direct_message_participants(user_id);
+	CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+	CREATE INDEX idx_notifications_is_read ON notifications(is_read);
+	
+	-- Create triggers for updated_at timestamps
+	CREATE TRIGGER update_chat_servers_updated_at
+	BEFORE UPDATE ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_chat_channels_updated_at
+	BEFORE UPDATE ON chat_channels
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_server_roles_updated_at
+	BEFORE UPDATE ON server_roles
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_messages_updated_at
+	BEFORE UPDATE ON messages
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_user_presence_updated_at
+	BEFORE UPDATE ON user_presence
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	CREATE TRIGGER update_direct_messages_updated_at
+	BEFORE UPDATE ON direct_messages
+	FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+	
+	-- Create default admin role function
+	CREATE OR REPLACE FUNCTION create_default_chat_server()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	    -- Create a chat server for the company
+	    INSERT INTO chat_servers (company_id, name, description)
+	    VALUES (NEW.id, NEW.name || ' Chat Server', 'Company chat server for ' || NEW.name);
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to create chat server when a company is created
+	CREATE TRIGGER create_company_chat_server
+	AFTER INSERT ON companies
+	FOR EACH ROW EXECUTE FUNCTION create_default_chat_server();
+	
+	-- Function to create default channels when a server is created
+	CREATE OR REPLACE FUNCTION create_default_channels()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	    -- Create general channel
+	    INSERT INTO chat_channels (server_id, name, description)
+	    VALUES (NEW.id, 'general', 'General discussion');
+	    
+	    -- Create announcements channel
+	    INSERT INTO chat_channels (server_id, name, description)
+	    VALUES (NEW.id, 'announcements', 'Company announcements');
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to create default channels when a server is created
+	CREATE TRIGGER create_server_default_channels
+	AFTER INSERT ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION create_default_channels();
+	
+	-- Function to create default roles when a server is created
+	CREATE OR REPLACE FUNCTION create_default_roles()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	    -- Create admin role
+	    INSERT INTO server_roles (server_id, name, color, permissions)
+	    VALUES (NEW.id, 'Admin', '#FF0000', '{"manage_channels": true, "manage_roles": true, "manage_messages": true, "manage_server": true}');
+	    
+	    -- Create moderator role
+	    INSERT INTO server_roles (server_id, name, color, permissions)
+	    VALUES (NEW.id, 'Moderator', '#00FF00', '{"manage_messages": true, "pin_messages": true}');
+	    
+	    -- Create member role
+	    INSERT INTO server_roles (server_id, name, color, permissions)
+	    VALUES (NEW.id, 'Member', '#0000FF', '{"send_messages": true, "read_messages": true}');
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to create default roles when a server is created
+	CREATE TRIGGER create_server_default_roles
+	AFTER INSERT ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION create_default_roles();
+	
+	-- Function to assign company admin to admin role
+	CREATE OR REPLACE FUNCTION assign_company_admin_role()
+	RETURNS TRIGGER AS $$
+	DECLARE
+	    admin_user_id UUID;
+	    admin_role_id UUID;
+	BEGIN
+	    -- Find the company admin user
+	    SELECT id INTO admin_user_id FROM users WHERE company_id = NEW.company_id AND role = 'admin' LIMIT 1;
+	    
+	    -- Find the admin role for this server
+	    SELECT id INTO admin_role_id FROM server_roles WHERE server_id = NEW.id AND name = 'Admin' LIMIT 1;
+	    
+	    -- Assign admin role to company admin if both exist
+	    IF admin_user_id IS NOT NULL AND admin_role_id IS NOT NULL THEN
+	        INSERT INTO user_roles (user_id, role_id, assigned_by)
+	        VALUES (admin_user_id, admin_role_id, admin_user_id);
+	    END IF;
+	    
+	    RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	
+	-- Trigger to assign company admin to admin role when a server is created
+	CREATE TRIGGER assign_server_admin_role
+	AFTER INSERT ON chat_servers
+	FOR EACH ROW EXECUTE FUNCTION assign_company_admin_role();
+2025-05-11 18:38:48 IST ERROR:  there is no unique or exclusion constraint matching the ON CONFLICT specification
+2025-05-11 18:38:48 IST STATEMENT:  INSERT INTO migrations (name) VALUES ('002_chat_system_fix.sql') ON CONFLICT (name) DO NOTHING
+2025-05-11 18:39:03 IST LOG:  checkpoint starting: time
+2025-05-11 18:39:20 IST LOG:  checkpoint complete: wrote 121 buffers (0.7%); 0 WAL file(s) added, 0 removed, 1 recycled; write=15.931 s, sync=0.343 s, total=16.309 s; sync files=217, longest=0.021 s, average=0.002 s; distance=1309 kB, estimate=1309 kB; lsn=0/312FF98, redo lsn=0/30F8A00
+2025-05-11 18:43:04 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 18:44:03 IST LOG:  checkpoint starting: time
+2025-05-11 18:44:21 IST LOG:  checkpoint complete: wrote 164 buffers (1.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=18.128 s, sync=0.027 s, total=18.165 s; sync files=114, longest=0.001 s, average=0.001 s; distance=1049 kB, estimate=1283 kB; lsn=0/31FF1B0, redo lsn=0/31FF120
+2025-05-11 18:44:28 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 18:44:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:01:52 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:03:19 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:08:14 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:09:13 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:10:38 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:16:44 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:18:58 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:19:27 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:21:02 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:22:01 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:22:28 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:23:13 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:23:56 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:24:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:25:57 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:27:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:29:07 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:30:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:31:29 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:31:54 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:32:07 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:32:42 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:32:52 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:33:15 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:33:24 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:33:49 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:34:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:35:08 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:36:06 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:36:53 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:39:10 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:39:42 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:40:29 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:41:25 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 19:42:46 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 20:34:03 IST LOG:  checkpoint starting: time
+2025-05-11 20:34:04 IST LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.988 s, sync=0.007 s, total=1.009 s; sync files=9, longest=0.003 s, average=0.001 s; distance=10 kB, estimate=1156 kB; lsn=0/3201BC0, redo lsn=0/3201B30
+2025-05-11 20:39:03 IST LOG:  checkpoint starting: time
+2025-05-11 20:39:04 IST LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.553 s, sync=0.004 s, total=0.568 s; sync files=6, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=1042 kB; lsn=0/3204BE8, redo lsn=0/3204B90
+2025-05-11 20:49:03 IST LOG:  checkpoint starting: time
+2025-05-11 20:49:03 IST LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.572 s, sync=0.003 s, total=0.602 s; sync files=6, longest=0.001 s, average=0.001 s; distance=11 kB, estimate=939 kB; lsn=0/3207AD0, redo lsn=0/3207A78
+2025-05-11 20:54:03 IST LOG:  checkpoint starting: time
+2025-05-11 20:54:08 IST LOG:  checkpoint complete: wrote 46 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.949 s, sync=0.064 s, total=5.022 s; sync files=30, longest=0.013 s, average=0.003 s; distance=133 kB, estimate=858 kB; lsn=0/32292C0, redo lsn=0/3229230
+2025-05-11 20:59:03 IST LOG:  checkpoint starting: time
+2025-05-11 20:59:07 IST LOG:  checkpoint complete: wrote 35 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.760 s, sync=0.013 s, total=3.784 s; sync files=28, longest=0.002 s, average=0.001 s; distance=148 kB, estimate=787 kB; lsn=0/324E560, redo lsn=0/324E508
+2025-05-11 21:04:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:04:05 IST LOG:  checkpoint complete: wrote 19 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.002 s, sync=0.006 s, total=2.021 s; sync files=14, longest=0.002 s, average=0.001 s; distance=90 kB, estimate=717 kB; lsn=0/3264DF8, redo lsn=0/3264D68
+2025-05-11 21:09:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:09:05 IST LOG:  checkpoint complete: wrote 15 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.531 s, sync=0.004 s, total=1.558 s; sync files=12, longest=0.002 s, average=0.001 s; distance=62 kB, estimate=652 kB; lsn=0/32747B0, redo lsn=0/3274758
+2025-05-11 21:13:55 IST ERROR:  relation "chats" does not exist at character 15
+2025-05-11 21:13:55 IST STATEMENT:  SELECT * FROM chats WHERE created_at IS NULL OR user_id IS NULL;
+2025-05-11 21:14:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:14:04 IST LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.893 s, sync=0.006 s, total=0.930 s; sync files=8, longest=0.002 s, average=0.001 s; distance=16 kB, estimate=588 kB; lsn=0/3278A48, redo lsn=0/32789F0
+2025-05-11 21:14:33 IST ERROR:  role "your_app_user" does not exist
+2025-05-11 21:14:33 IST STATEMENT:  GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO your_app_user;
+2025-05-11 21:14:52 IST ERROR:  relation "chats" does not exist at character 61
+2025-05-11 21:14:52 IST STATEMENT:  SELECT * FROM messages WHERE chat_id NOT IN (SELECT id FROM chats);
+2025-05-11 21:19:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:19:03 IST LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.667 s, sync=0.003 s, total=0.683 s; sync files=7, longest=0.001 s, average=0.001 s; distance=18 kB, estimate=531 kB; lsn=0/327D2C0, redo lsn=0/327D268
+2025-05-11 21:24:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:24:05 IST LOG:  checkpoint complete: wrote 11 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.217 s, sync=0.002 s, total=1.248 s; sync files=4, longest=0.001 s, average=0.001 s; distance=35 kB, estimate=482 kB; lsn=0/3286090, redo lsn=0/3286038
+2025-05-11 21:24:38 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 21:28:28 IST ERROR:  constraint "channel_members_channel_id_fkey" for relation "channel_members" already exists
+2025-05-11 21:28:28 IST STATEMENT:  -- This script was generated by the ERD tool in pgAdmin 4.
+	-- Please log an issue at https://github.com/pgadmin-org/pgadmin4/issues/new/choose if you find any bugs, including reproduction steps.
+	BEGIN;
+	
+	
+	CREATE TABLE IF NOT EXISTS public.channel_members
+	(
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    joined_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT channel_members_pkey PRIMARY KEY (channel_id, user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.chat_channels
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    server_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    description text COLLATE pg_catalog."default",
+	    is_private boolean NOT NULL DEFAULT false,
+	    is_archived boolean NOT NULL DEFAULT false,
+	    created_by uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT chat_channels_pkey PRIMARY KEY (id),
+	    CONSTRAINT chat_channels_server_id_name_key UNIQUE (server_id, name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.chat_servers
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    company_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    description text COLLATE pg_catalog."default",
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT chat_servers_pkey PRIMARY KEY (id),
+	    CONSTRAINT chat_servers_company_id_key UNIQUE (company_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.companies
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    website character varying(100) COLLATE pg_catalog."default",
+	    industry character varying(100) COLLATE pg_catalog."default",
+	    size character varying(50) COLLATE pg_catalog."default",
+	    description text COLLATE pg_catalog."default",
+	    logo_url character varying(255) COLLATE pg_catalog."default",
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT companies_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.direct_message_channels
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT direct_message_channels_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.direct_message_participants
+	(
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    CONSTRAINT direct_message_participants_pkey PRIMARY KEY (channel_id, user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.direct_messages
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    channel_id uuid NOT NULL,
+	    sender_id uuid NOT NULL,
+	    content text COLLATE pg_catalog."default" NOT NULL,
+	    is_edited boolean NOT NULL DEFAULT false,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT direct_messages_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.message_attachments
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    message_id uuid NOT NULL,
+	    file_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    file_type character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    file_size integer NOT NULL,
+	    file_url character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT message_attachments_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.message_reactions
+	(
+	    message_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    emoji character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT message_reactions_pkey PRIMARY KEY (message_id, user_id, emoji)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.messages
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    content text COLLATE pg_catalog."default" NOT NULL,
+	    is_edited boolean NOT NULL DEFAULT false,
+	    is_pinned boolean NOT NULL DEFAULT false,
+	    parent_id uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT messages_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.migrations
+	(
+	    id serial NOT NULL,
+	    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    applied_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT migrations_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.notifications
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    user_id uuid NOT NULL,
+	    type character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    content text COLLATE pg_catalog."default" NOT NULL,
+	    is_read boolean NOT NULL DEFAULT false,
+	    reference_id uuid,
+	    reference_type character varying(50) COLLATE pg_catalog."default",
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT notifications_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.owners
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    email character varying(100) COLLATE pg_catalog."default",
+	    phone character varying(20) COLLATE pg_catalog."default",
+	    address character varying(255) COLLATE pg_catalog."default",
+	    owner_type character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'individual'::character varying,
+	    company_id uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT owners_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.properties
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    address character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    city character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    state character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    zip character varying(20) COLLATE pg_catalog."default" NOT NULL,
+	    lat numeric(10, 8),
+	    lng numeric(11, 8),
+	    property_type character varying(50) COLLATE pg_catalog."default",
+	    bedrooms integer,
+	    bathrooms numeric(3, 1),
+	    square_feet integer,
+	    lot_size numeric(10, 2),
+	    year_built integer,
+	    value numeric(12, 2),
+	    last_sale_date date,
+	    last_sale_amount numeric(12, 2),
+	    owner_id uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT properties_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.read_receipts
+	(
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    last_read_message_id uuid,
+	    last_read_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT read_receipts_pkey PRIMARY KEY (channel_id, user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.reports
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    user_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    description text COLLATE pg_catalog."default",
+	    type character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    parameters jsonb NOT NULL,
+	    result_url character varying(255) COLLATE pg_catalog."default",
+	    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'pending'::character varying,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT reports_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.saved_map_views
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    user_id uuid NOT NULL,
+	    name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    center_lat numeric(10, 8) NOT NULL,
+	    center_lng numeric(11, 8) NOT NULL,
+	    zoom integer NOT NULL,
+	    bounds_ne_lat numeric(10, 8),
+	    bounds_ne_lng numeric(11, 8),
+	    bounds_sw_lat numeric(10, 8),
+	    bounds_sw_lng numeric(11, 8),
+	    filters jsonb,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT saved_map_views_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.saved_searches
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    user_id uuid NOT NULL,
+	    name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    criteria jsonb NOT NULL,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT saved_searches_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.server_roles
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    server_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    color character varying(7) COLLATE pg_catalog."default",
+	    permissions jsonb NOT NULL DEFAULT '{}'::jsonb,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT server_roles_pkey PRIMARY KEY (id),
+	    CONSTRAINT server_roles_server_id_name_key UNIQUE (server_id, name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.user_channel_settings
+	(
+	    user_id uuid NOT NULL,
+	    channel_id uuid NOT NULL,
+	    muted boolean NOT NULL DEFAULT false,
+	    notification_preference character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'all'::character varying,
+	    CONSTRAINT user_channel_settings_pkey PRIMARY KEY (user_id, channel_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.user_presence
+	(
+	    user_id uuid NOT NULL,
+	    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'offline'::character varying,
+	    last_active timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT user_presence_pkey PRIMARY KEY (user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.user_roles
+	(
+	    user_id uuid NOT NULL,
+	    role_id uuid NOT NULL,
+	    assigned_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    assigned_by uuid,
+	    CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.users
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    first_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    last_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    password character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    role character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'user'::character varying,
+	    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'pending'::character varying,
+	    company_id uuid,
+	    reset_password_token character varying(100) COLLATE pg_catalog."default",
+	    reset_password_expire timestamp without time zone,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT users_pkey PRIMARY KEY (id),
+	    CONSTRAINT users_email_key UNIQUE (email)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.wealth_profiles
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    owner_id uuid NOT NULL,
+	    estimated_net_worth numeric(14, 2),
+	    income_range character varying(50) COLLATE pg_catalog."default",
+	    liquid_assets_range character varying(50) COLLATE pg_catalog."default",
+	    real_estate_holdings integer,
+	    source character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    last_updated timestamp without time zone NOT NULL DEFAULT now(),
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT wealth_profiles_pkey PRIMARY KEY (id)
+	);
+	
+	ALTER TABLE IF EXISTS public.channel_members
+	    ADD CONSTRAINT channel_members_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.channel_members
+	    ADD CONSTRAINT channel_members_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_channel_members_user_id
+	    ON public.channel_members(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.chat_channels
+	    ADD CONSTRAINT chat_channels_created_by_fkey FOREIGN KEY (created_by)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.chat_channels
+	    ADD CONSTRAINT chat_channels_server_id_fkey FOREIGN KEY (server_id)
+	    REFERENCES public.chat_servers (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.chat_servers
+	    ADD CONSTRAINT chat_servers_company_id_fkey FOREIGN KEY (company_id)
+	    REFERENCES public.companies (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS chat_servers_company_id_key
+	    ON public.chat_servers(company_id);
+	
+	
+	ALTER TABLE IF EXISTS public.direct_message_participants
+	    ADD CONSTRAINT direct_message_participants_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.direct_message_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.direct_message_participants
+	    ADD CONSTRAINT direct_message_participants_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_direct_message_participants_user_id
+	    ON public.direct_message_participants(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.direct_messages
+	    ADD CONSTRAINT direct_messages_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.direct_message_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.direct_messages
+	    ADD CONSTRAINT direct_messages_sender_id_fkey FOREIGN KEY (sender_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.message_attachments
+	    ADD CONSTRAINT message_attachments_message_id_fkey FOREIGN KEY (message_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.message_reactions
+	    ADD CONSTRAINT message_reactions_message_id_fkey FOREIGN KEY (message_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.message_reactions
+	    ADD CONSTRAINT message_reactions_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.messages
+	    ADD CONSTRAINT messages_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_messages_channel_id
+	    ON public.messages(channel_id);
+	
+	
+	ALTER TABLE IF EXISTS public.messages
+	    ADD CONSTRAINT messages_parent_id_fkey FOREIGN KEY (parent_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.messages
+	    ADD CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_messages_user_id
+	    ON public.messages(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.notifications
+	    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_notifications_user_id
+	    ON public.notifications(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.owners
+	    ADD CONSTRAINT fk_company FOREIGN KEY (company_id)
+	    REFERENCES public.companies (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.properties
+	    ADD CONSTRAINT fk_owner FOREIGN KEY (owner_id)
+	    REFERENCES public.owners (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	CREATE INDEX IF NOT EXISTS idx_properties_owner
+	    ON public.properties(owner_id);
+	
+	
+	ALTER TABLE IF EXISTS public.read_receipts
+	    ADD CONSTRAINT read_receipts_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.read_receipts
+	    ADD CONSTRAINT read_receipts_last_read_message_id_fkey FOREIGN KEY (last_read_message_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.read_receipts
+	    ADD CONSTRAINT read_receipts_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.reports
+	    ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_reports_user
+	    ON public.reports(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.saved_map_views
+	    ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_saved_map_views_user
+	    ON public.saved_map_views(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.saved_searches
+	    ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_saved_searches_user
+	    ON public.saved_searches(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.server_roles
+	    ADD CONSTRAINT server_roles_server_id_fkey FOREIGN KEY (server_id)
+	    REFERENCES public.chat_servers (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.user_channel_settings
+	    ADD CONSTRAINT user_channel_settings_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.user_channel_settings
+	    ADD CONSTRAINT user_channel_settings_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.user_presence
+	    ADD CONSTRAINT user_presence_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS user_presence_pkey
+	    ON public.user_presence(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.user_roles
+	    ADD CONSTRAINT user_roles_assigned_by_fkey FOREIGN KEY (assigned_by)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.user_roles
+	    ADD CONSTRAINT user_roles_role_id_fkey FOREIGN KEY (role_id)
+	    REFERENCES public.server_roles (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_user_roles_role_id
+	    ON public.user_roles(role_id);
+	
+	
+	ALTER TABLE IF EXISTS public.user_roles
+	    ADD CONSTRAINT user_roles_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_user_roles_user_id
+	    ON public.user_roles(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.users
+	    ADD CONSTRAINT fk_company FOREIGN KEY (company_id)
+	    REFERENCES public.companies (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	CREATE INDEX IF NOT EXISTS idx_users_company
+	    ON public.users(company_id);
+	
+	
+	ALTER TABLE IF EXISTS public.wealth_profiles
+	    ADD CONSTRAINT fk_owner FOREIGN KEY (owner_id)
+	    REFERENCES public.owners (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_wealth_profiles_owner
+	    ON public.wealth_profiles(owner_id);
+	
+	END;
+2025-05-11 21:29:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:29:03 IST LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.335 s, sync=0.002 s, total=0.364 s; sync files=2, longest=0.002 s, average=0.001 s; distance=4 kB, estimate=434 kB; lsn=0/3287330, redo lsn=0/32872D8
+2025-05-11 21:39:03 IST LOG:  checkpoint starting: time
+2025-05-11 21:39:08 IST LOG:  checkpoint complete: wrote 50 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=5.430 s, sync=0.019 s, total=5.459 s; sync files=26, longest=0.011 s, average=0.001 s; distance=291 kB, estimate=420 kB; lsn=0/32D0318, redo lsn=0/32D02C0
+2025-05-11 21:44:04 IST LOG:  checkpoint starting: time
+2025-05-11 21:44:05 IST LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.932 s, sync=0.048 s, total=1.017 s; sync files=8, longest=0.015 s, average=0.006 s; distance=17 kB, estimate=379 kB; lsn=0/32D4AC0, redo lsn=0/32D4A68
+2025-05-11 21:44:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 21:44:45 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 21:45:28 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 21:45:28 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 22:01:30 IST ERROR:  relation "login_attempts" does not exist at character 13
+2025-05-11 22:01:30 IST STATEMENT:  INSERT INTO login_attempts (user_id, ip_address, success)
+	         VALUES ($1, $2, $3)
+2025-05-11 22:03:13 IST ERROR:  relation "login_attempts" does not exist at character 13
+2025-05-11 22:03:13 IST STATEMENT:  INSERT INTO login_attempts (user_id, ip_address, success)
+	         VALUES ($1, $2, $3)
+2025-05-11 22:04:04 IST LOG:  checkpoint starting: time
+2025-05-11 22:04:04 IST LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.618 s, sync=0.004 s, total=0.635 s; sync files=6, longest=0.002 s, average=0.001 s; distance=18 kB, estimate=343 kB; lsn=0/32D9610, redo lsn=0/32D95B8
+2025-05-11 22:28:06 IST ERROR:  relation "login_attempts" does not exist at character 13
+2025-05-11 22:28:06 IST STATEMENT:  INSERT INTO login_attempts (user_id, ip_address, success)
+	         VALUES ($1, $2, $3)
+2025-05-11 22:28:07 IST ERROR:  relation "login_attempts" does not exist at character 13
+2025-05-11 22:28:07 IST STATEMENT:  INSERT INTO login_attempts (user_id, ip_address, success)
+	         VALUES ($1, $2, $3)
+2025-05-11 22:29:04 IST LOG:  checkpoint starting: time
+2025-05-11 22:29:05 IST LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.548 s, sync=0.004 s, total=0.560 s; sync files=6, longest=0.002 s, average=0.001 s; distance=19 kB, estimate=311 kB; lsn=0/32DE3C8, redo lsn=0/32DE370
+2025-05-11 22:47:15 IST ERROR:  syntax error at or near "BEGIN" at character 331
+2025-05-11 22:47:15 IST STATEMENT:  EXPLAIN (FORMAT JSON, ANALYZE true, VERBOSE false, COSTS false, TIMING false, BUFFERS false, SUMMARY false, SETTINGS false, WAL false) -- This script was generated by the ERD tool in pgAdmin 4.
+	-- Please log an issue at https://github.com/pgadmin-org/pgadmin4/issues/new/choose if you find any bugs, including reproduction steps.
+	BEGIN;
+	
+	
+	CREATE TABLE IF NOT EXISTS public.channel_members
+	(
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    joined_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT channel_members_pkey PRIMARY KEY (channel_id, user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.chat_channels
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    server_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    description text COLLATE pg_catalog."default",
+	    is_private boolean NOT NULL DEFAULT false,
+	    is_archived boolean NOT NULL DEFAULT false,
+	    created_by uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT chat_channels_pkey PRIMARY KEY (id),
+	    CONSTRAINT chat_channels_server_id_name_key UNIQUE (server_id, name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.chat_servers
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    company_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    description text COLLATE pg_catalog."default",
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT chat_servers_pkey PRIMARY KEY (id),
+	    CONSTRAINT chat_servers_company_id_key UNIQUE (company_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.companies
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    website character varying(100) COLLATE pg_catalog."default",
+	    industry character varying(100) COLLATE pg_catalog."default",
+	    size character varying(50) COLLATE pg_catalog."default",
+	    description text COLLATE pg_catalog."default",
+	    logo_url character varying(255) COLLATE pg_catalog."default",
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT companies_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.direct_message_channels
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT direct_message_channels_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.direct_message_participants
+	(
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    CONSTRAINT direct_message_participants_pkey PRIMARY KEY (channel_id, user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.direct_messages
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    channel_id uuid NOT NULL,
+	    sender_id uuid NOT NULL,
+	    content text COLLATE pg_catalog."default" NOT NULL,
+	    is_edited boolean NOT NULL DEFAULT false,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT direct_messages_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.message_attachments
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    message_id uuid NOT NULL,
+	    file_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    file_type character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    file_size integer NOT NULL,
+	    file_url character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT message_attachments_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.message_reactions
+	(
+	    message_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    emoji character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT message_reactions_pkey PRIMARY KEY (message_id, user_id, emoji)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.messages
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    content text COLLATE pg_catalog."default" NOT NULL,
+	    is_edited boolean NOT NULL DEFAULT false,
+	    is_pinned boolean NOT NULL DEFAULT false,
+	    parent_id uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT messages_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.migrations
+	(
+	    id serial NOT NULL,
+	    name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    applied_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT migrations_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.notifications
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    user_id uuid NOT NULL,
+	    type character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    content text COLLATE pg_catalog."default" NOT NULL,
+	    is_read boolean NOT NULL DEFAULT false,
+	    reference_id uuid,
+	    reference_type character varying(50) COLLATE pg_catalog."default",
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT notifications_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.owners
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    email character varying(100) COLLATE pg_catalog."default",
+	    phone character varying(20) COLLATE pg_catalog."default",
+	    address character varying(255) COLLATE pg_catalog."default",
+	    owner_type character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'individual'::character varying,
+	    company_id uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT owners_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.properties
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    address character varying(255) COLLATE pg_catalog."default" NOT NULL,
+	    city character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    state character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    zip character varying(20) COLLATE pg_catalog."default" NOT NULL,
+	    lat numeric(10, 8),
+	    lng numeric(11, 8),
+	    property_type character varying(50) COLLATE pg_catalog."default",
+	    bedrooms integer,
+	    bathrooms numeric(3, 1),
+	    square_feet integer,
+	    lot_size numeric(10, 2),
+	    year_built integer,
+	    value numeric(12, 2),
+	    last_sale_date date,
+	    last_sale_amount numeric(12, 2),
+	    owner_id uuid,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT properties_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.read_receipts
+	(
+	    channel_id uuid NOT NULL,
+	    user_id uuid NOT NULL,
+	    last_read_message_id uuid,
+	    last_read_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT read_receipts_pkey PRIMARY KEY (channel_id, user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.reports
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    user_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    description text COLLATE pg_catalog."default",
+	    type character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    parameters jsonb NOT NULL,
+	    result_url character varying(255) COLLATE pg_catalog."default",
+	    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'pending'::character varying,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT reports_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.saved_map_views
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    user_id uuid NOT NULL,
+	    name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    center_lat numeric(10, 8) NOT NULL,
+	    center_lng numeric(11, 8) NOT NULL,
+	    zoom integer NOT NULL,
+	    bounds_ne_lat numeric(10, 8),
+	    bounds_ne_lng numeric(11, 8),
+	    bounds_sw_lat numeric(10, 8),
+	    bounds_sw_lng numeric(11, 8),
+	    filters jsonb,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT saved_map_views_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.saved_searches
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    user_id uuid NOT NULL,
+	    name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    criteria jsonb NOT NULL,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT saved_searches_pkey PRIMARY KEY (id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.server_roles
+	(
+	    id uuid NOT NULL DEFAULT gen_random_uuid(),
+	    server_id uuid NOT NULL,
+	    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    color character varying(7) COLLATE pg_catalog."default",
+	    permissions jsonb NOT NULL DEFAULT '{}'::jsonb,
+	    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT server_roles_pkey PRIMARY KEY (id),
+	    CONSTRAINT server_roles_server_id_name_key UNIQUE (server_id, name)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.user_channel_settings
+	(
+	    user_id uuid NOT NULL,
+	    channel_id uuid NOT NULL,
+	    muted boolean NOT NULL DEFAULT false,
+	    notification_preference character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'all'::character varying,
+	    CONSTRAINT user_channel_settings_pkey PRIMARY KEY (user_id, channel_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.user_presence
+	(
+	    user_id uuid NOT NULL,
+	    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'offline'::character varying,
+	    last_active timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    CONSTRAINT user_presence_pkey PRIMARY KEY (user_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.user_roles
+	(
+	    user_id uuid NOT NULL,
+	    role_id uuid NOT NULL,
+	    assigned_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	    assigned_by uuid,
+	    CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.users
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    first_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    last_name character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    password character varying(100) COLLATE pg_catalog."default" NOT NULL,
+	    role character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'user'::character varying,
+	    status character varying(20) COLLATE pg_catalog."default" NOT NULL DEFAULT 'pending'::character varying,
+	    company_id uuid,
+	    reset_password_token character varying(100) COLLATE pg_catalog."default",
+	    reset_password_expire timestamp without time zone,
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT users_pkey PRIMARY KEY (id),
+	    CONSTRAINT users_email_key UNIQUE (email)
+	);
+	
+	CREATE TABLE IF NOT EXISTS public.wealth_profiles
+	(
+	    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	    owner_id uuid NOT NULL,
+	    estimated_net_worth numeric(14, 2),
+	    income_range character varying(50) COLLATE pg_catalog."default",
+	    liquid_assets_range character varying(50) COLLATE pg_catalog."default",
+	    real_estate_holdings integer,
+	    source character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	    last_updated timestamp without time zone NOT NULL DEFAULT now(),
+	    created_at timestamp without time zone NOT NULL DEFAULT now(),
+	    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+	    CONSTRAINT wealth_profiles_pkey PRIMARY KEY (id)
+	);
+	
+	ALTER TABLE IF EXISTS public.channel_members
+	    ADD CONSTRAINT channel_members_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.channel_members
+	    ADD CONSTRAINT channel_members_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_channel_members_user_id
+	    ON public.channel_members(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.chat_channels
+	    ADD CONSTRAINT chat_channels_created_by_fkey FOREIGN KEY (created_by)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.chat_channels
+	    ADD CONSTRAINT chat_channels_server_id_fkey FOREIGN KEY (server_id)
+	    REFERENCES public.chat_servers (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.chat_servers
+	    ADD CONSTRAINT chat_servers_company_id_fkey FOREIGN KEY (company_id)
+	    REFERENCES public.companies (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS chat_servers_company_id_key
+	    ON public.chat_servers(company_id);
+	
+	
+	ALTER TABLE IF EXISTS public.direct_message_participants
+	    ADD CONSTRAINT direct_message_participants_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.direct_message_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.direct_message_participants
+	    ADD CONSTRAINT direct_message_participants_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_direct_message_participants_user_id
+	    ON public.direct_message_participants(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.direct_messages
+	    ADD CONSTRAINT direct_messages_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.direct_message_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.direct_messages
+	    ADD CONSTRAINT direct_messages_sender_id_fkey FOREIGN KEY (sender_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.message_attachments
+	    ADD CONSTRAINT message_attachments_message_id_fkey FOREIGN KEY (message_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.message_reactions
+	    ADD CONSTRAINT message_reactions_message_id_fkey FOREIGN KEY (message_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.message_reactions
+	    ADD CONSTRAINT message_reactions_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.messages
+	    ADD CONSTRAINT messages_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_messages_channel_id
+	    ON public.messages(channel_id);
+	
+	
+	ALTER TABLE IF EXISTS public.messages
+	    ADD CONSTRAINT messages_parent_id_fkey FOREIGN KEY (parent_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.messages
+	    ADD CONSTRAINT messages_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_messages_user_id
+	    ON public.messages(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.notifications
+	    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_notifications_user_id
+	    ON public.notifications(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.owners
+	    ADD CONSTRAINT fk_company FOREIGN KEY (company_id)
+	    REFERENCES public.companies (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.properties
+	    ADD CONSTRAINT fk_owner FOREIGN KEY (owner_id)
+	    REFERENCES public.owners (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	CREATE INDEX IF NOT EXISTS idx_properties_owner
+	    ON public.properties(owner_id);
+	
+	
+	ALTER TABLE IF EXISTS public.read_receipts
+	    ADD CONSTRAINT read_receipts_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.read_receipts
+	    ADD CONSTRAINT read_receipts_last_read_message_id_fkey FOREIGN KEY (last_read_message_id)
+	    REFERENCES public.messages (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.read_receipts
+	    ADD CONSTRAINT read_receipts_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.reports
+	    ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_reports_user
+	    ON public.reports(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.saved_map_views
+	    ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_saved_map_views_user
+	    ON public.saved_map_views(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.saved_searches
+	    ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_saved_searches_user
+	    ON public.saved_searches(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.server_roles
+	    ADD CONSTRAINT server_roles_server_id_fkey FOREIGN KEY (server_id)
+	    REFERENCES public.chat_servers (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.user_channel_settings
+	    ADD CONSTRAINT user_channel_settings_channel_id_fkey FOREIGN KEY (channel_id)
+	    REFERENCES public.chat_channels (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.user_channel_settings
+	    ADD CONSTRAINT user_channel_settings_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	
+	
+	ALTER TABLE IF EXISTS public.user_presence
+	    ADD CONSTRAINT user_presence_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS user_presence_pkey
+	    ON public.user_presence(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.user_roles
+	    ADD CONSTRAINT user_roles_assigned_by_fkey FOREIGN KEY (assigned_by)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	
+	
+	ALTER TABLE IF EXISTS public.user_roles
+	    ADD CONSTRAINT user_roles_role_id_fkey FOREIGN KEY (role_id)
+	    REFERENCES public.server_roles (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_user_roles_role_id
+	    ON public.user_roles(role_id);
+	
+	
+	ALTER TABLE IF EXISTS public.user_roles
+	    ADD CONSTRAINT user_roles_user_id_fkey FOREIGN KEY (user_id)
+	    REFERENCES public.users (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_user_roles_user_id
+	    ON public.user_roles(user_id);
+	
+	
+	ALTER TABLE IF EXISTS public.users
+	    ADD CONSTRAINT fk_company FOREIGN KEY (company_id)
+	    REFERENCES public.companies (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE SET NULL;
+	CREATE INDEX IF NOT EXISTS idx_users_company
+	    ON public.users(company_id);
+	
+	
+	ALTER TABLE IF EXISTS public.wealth_profiles
+	    ADD CONSTRAINT fk_owner FOREIGN KEY (owner_id)
+	    REFERENCES public.owners (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE CASCADE;
+	CREATE INDEX IF NOT EXISTS idx_wealth_profiles_owner
+	    ON public.wealth_profiles(owner_id);
+	
+	END;
+2025-05-11 22:54:04 IST LOG:  checkpoint starting: time
+2025-05-11 22:54:06 IST LOG:  checkpoint complete: wrote 19 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.985 s, sync=0.004 s, total=2.004 s; sync files=9, longest=0.001 s, average=0.001 s; distance=19 kB, estimate=282 kB; lsn=0/32E31A0, redo lsn=0/32E3148
+2025-05-11 22:55:35 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 23:07:29 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 23:07:29 IST LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-05-11 23:29:04 IST LOG:  checkpoint starting: time
+2025-05-11 23:29:05 IST LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.765 s, sync=0.005 s, total=0.799 s; sync files=7, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=255 kB; lsn=0/32E6350, redo lsn=0/32E62F8
