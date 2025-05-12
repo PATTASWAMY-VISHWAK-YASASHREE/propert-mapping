@@ -1,0 +1,120 @@
+.property-map-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 70px); /* Adjust based on header height */
+}
+
+.map-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.map-loading-overlay,
+.map-error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.map-error-overlay {
+  background-color: rgba(255, 235, 235, 0.9);
+}
+
+.map-error-overlay p {
+  margin-bottom: 20px;
+  color: #721c24;
+}
+
+.map-error-overlay button {
+  padding: 10px 20px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.property-details-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 350px;
+  height: 100%;
+  background-color: white;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 20px;
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.close-sidebar-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+/* Leaflet map customizations */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  width: 280px !important;
+}
+
+.leaflet-popup-close-button {
+  top: 5px;
+  right: 5px;
+}
+
+/* Marker cluster customizations */
+.marker-cluster {
+  background-color: rgba(66, 133, 244, 0.6);
+}
+
+.marker-cluster div {
+  background-color: rgba(66, 133, 244, 0.8);
+  color: white;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .property-details-sidebar {
+    width: 100%;
+    transform: translateX(100%);
+  }
+  
+  .property-details-sidebar.open {
+    transform: translateX(0);
+  }
+}

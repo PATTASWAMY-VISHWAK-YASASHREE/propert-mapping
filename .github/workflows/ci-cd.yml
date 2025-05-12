@@ -1,0 +1,149 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: |
+        npm ci
+        npm ci --prefix backend
+        npm ci --prefix frontend
+    
+    - name: Lint Backend
+      run: npm run lint --prefix backend
+    
+    - name: Lint Frontend
+      run: npm run lint --prefix frontend
+    
+    - name: Run Backend Tests
+      run: npm test --prefix backend
+      env:
+        NODE_ENV: test
+        MONGO_URI: mongodb://localhost:27017/property-mapping-test
+        JWT_SECRET: test_jwt_secret
+        JWT_EXPIRE: 1d
+    
+    - name: Run Frontend Tests
+      run: npm test --prefix frontend -- --watchAll=false
+    
+    - name: Upload Test Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: |
+        npm ci
+        npm ci --prefix backend
+        npm ci --prefix frontend
+    
+    - name: Build Frontend
+      run: npm run build --prefix frontend
+      env:
+        CI: false
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-build
+        path: frontend/build
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download Build Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: frontend-build
+        path: frontend/build
+    
+    - name: Deploy to Heroku (Staging)
+      uses: akhileshns/heroku-deploy@v3.12.14
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: "property-mapping-staging"
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        procfile: "web: npm start"
+      env:
+        HD_NODE_ENV: staging
+        HD_MONGO_URI: ${{ secrets.STAGING_MONGO_URI }}
+        HD_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+        HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
+        HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+
+  deploy-production:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download Build Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: frontend-build
+        path: frontend/build
+    
+    - name: Deploy to Heroku (Production)
+      uses: akhileshns/heroku-deploy@v3.12.14
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: "property-mapping-production"
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        procfile: "web: npm start"
+      env:
+        HD_NODE_ENV: production
+        HD_MONGO_URI: ${{ secrets.PRODUCTION_MONGO_URI }}
+        HD_JWT_SECRET: ${{ secrets.PRODUCTION_JWT_SECRET }}
+        HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
+        HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}

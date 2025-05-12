@@ -1,0 +1,46 @@
+.wealth-composition-chart {
+  margin-bottom: 30px;
+}
+
+.wealth-composition-chart h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chart-wrapper {
+  height: 300px;
+  position: relative;
+}
+
+.chart-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.total-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.total-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.wealth-chart-placeholder {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}

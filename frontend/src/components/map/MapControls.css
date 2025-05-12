@@ -1,0 +1,53 @@
+.map-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-type-controls,
+.map-action-controls {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.map-type-btn,
+.map-action-btn {
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: background-color 0.3s;
+}
+
+.map-type-btn:hover,
+.map-action-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.map-type-btn.active {
+  background-color: #e0e0e0;
+  color: #4285f4;
+}
+
+.map-type-btn i,
+.map-action-btn i {
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .map-controls {
+    top: auto;
+    bottom: 20px;
+    right: 10px;
+  }
+}

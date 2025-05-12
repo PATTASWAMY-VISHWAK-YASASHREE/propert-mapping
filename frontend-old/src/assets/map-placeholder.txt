@@ -1,0 +1,1 @@
+This is a placeholder for the map image. In a real implementation, you would have an actual image file here.

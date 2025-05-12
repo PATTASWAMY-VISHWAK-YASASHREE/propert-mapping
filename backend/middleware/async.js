@@ -1,0 +1,12 @@
+/**
+ * Async handler middleware
+ * Wraps async functions to handle errors
+ */
+
+function asyncHandler(fn) {
+  return function(req, res, next) {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+}
+
+module.exports = asyncHandler;

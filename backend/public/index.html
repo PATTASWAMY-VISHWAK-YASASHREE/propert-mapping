@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Mapping Platform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+    }
+    h1 {
+      color: #333;
+    }
+    p {
+      color: #666;
+      line-height: 1.6;
+    }
+    .api-status {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #e8f5e9;
+      border-radius: 4px;
+    }
+    .api-status.error {
+      background-color: #ffebee;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Property Mapping Platform API</h1>
+    <p>The API server is running successfully. This is a placeholder page until the frontend is built and deployed.</p>
+    
+    <div class="api-status" id="apiStatus">
+      <p>Checking API status...</p>
+    </div>
+  </div>
+
+  <script>
+    // Check API health endpoint
+    fetch('/health')
+      .then(response => response.json())
+      .then(data => {
+        const statusElement = document.getElementById('apiStatus');
+        statusElement.innerHTML = `
+          <p><strong>API Status:</strong> ${data.status}</p>
+          <p><strong>Environment:</strong> ${data.environment}</p>
+          <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+        `;
+      })
+      .catch(error => {
+        const statusElement = document.getElementById('apiStatus');
+        statusElement.classList.add('error');
+        statusElement.innerHTML = `
+          <p><strong>API Status:</strong> Error</p>
+          <p><strong>Message:</strong> Could not connect to API</p>
+        `;
+        console.error('Error checking API status:', error);
+      });
+  </script>
+</body>
+</html>
