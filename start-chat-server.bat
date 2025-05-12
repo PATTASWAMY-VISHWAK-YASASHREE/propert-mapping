@@ -1,0 +1,3 @@
+@echo off
+echo Starting Chat Server on port 5001...
+node chat-server.js
