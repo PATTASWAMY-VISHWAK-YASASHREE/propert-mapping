@@ -27,7 +27,7 @@ Create a `.env` file in the root directory:
 
 ```
 DB_USER=postgres
-DB_PASSWORD=vishwak
+DB_PASSWORD="password"
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=property_mapping
