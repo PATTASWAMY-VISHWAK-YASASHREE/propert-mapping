@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -13,6 +13,7 @@ import { API_FEATURES, isFeatureEnabled } from './config';
 import Header from './components/layout/Header';
 import Alert from './components/layout/Alert';
 import FeatureGuard from './components/FeatureGuard';
+import RegridMap from './components/map/regridmap';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -85,26 +86,27 @@ function App() {
               <Route exact path="/" component={Dashboard} />
               <Route exact path="/login" component={LoginPage} />
               <Route exact path="/register" component={RegisterPage} />
-              <Route exact path="/map">
+              <Route exact path="/map" render={() => (
                 <FeatureGuard 
                   feature="maps" 
                   fallback={<div style={{padding: '20px'}}>Maps feature is disabled due to missing API key.</div>}
                 >
                   <PropertyMap />
                 </FeatureGuard>
-              </Route>
+              )} />
               <Route exact path="/property/:id" component={PropertyDetail} />
               <Route exact path="/wealth/:id" component={WealthAnalysis} />
               <Route exact path="/reports" component={ReportGenerator} />
-              <Route exact path="/chat">
+              <Route exact path="/chat" render={() => (
                 <FeatureGuard 
                   feature="chat" 
                   fallback={<div style={{padding: '20px'}}>Chat feature is disabled due to missing API key.</div>}
                 >
                   <ChatPage />
                 </FeatureGuard>
-              </Route>
+              )} />
               <Route exact path="/api-test" component={ApiTestPage} />
+              <Route exact path="/regrid-map" component={RegridMap} />
             </Switch>
           </Router>
         </AlertProvider>

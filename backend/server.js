@@ -104,6 +104,8 @@ db.initializeDatabase().then(() => {
   app.use('/api/health', require('./routes/health'));
   app.use('/api/propmap', require('./routes/propmap'));
   app.use('/api/scrape', require('./routes/scrape'));
+  const regridRoutes = require('./routes/regrid');
+  app.use('/api/regrid', regridRoutes);
 
   // API documentation
   if (config.env === 'development') {
