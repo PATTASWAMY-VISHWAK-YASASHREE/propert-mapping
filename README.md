@@ -1,4 +1,4 @@
-# AI Face Swapper with Chat System
+# property-mapping with Chat System
 
 This project includes a dedicated chat server implementation to avoid routing errors and stack overflow issues.
 
