@@ -3,147 +3,341 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: 18.x
+  CACHE_NPM_DEPS: npm-deps-${{ hashFiles('**/package-lock.json') }}
+  POSTGRES_VERSION: 14
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            **/node_modules
+          key: ${{ env.CACHE_NPM_DEPS }}
+      
+      - name: Install Dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          npm ci --prefix backend
+          npm ci --prefix frontend
+      
+      - name: Lint Backend
+        run: npm run lint --prefix backend
+      
+      - name: Lint Frontend
+        run: npm run lint --prefix frontend
+
   test:
     name: Test
     runs-on: ubuntu-latest
+    needs: lint
 
     services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: property_mapping_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
       mongodb:
         image: mongo:latest
         ports:
           - 27017:27017
-
-    strategy:
-      matrix:
-        node-version: [16.x]
+        options: >-
+          --health-cmd mongosh\ --eval\ \"db.runCommand\(\{\ ping:\ 1\ \}\)\"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Install Dependencies
-      run: |
-        npm ci
-        npm ci --prefix backend
-        npm ci --prefix frontend
-    
-    - name: Lint Backend
-      run: npm run lint --prefix backend
-    
-    - name: Lint Frontend
-      run: npm run lint --prefix frontend
-    
-    - name: Run Backend Tests
-      run: npm test --prefix backend
-      env:
-        NODE_ENV: test
-        MONGO_URI: mongodb://localhost:27017/property-mapping-test
-        JWT_SECRET: test_jwt_secret
-        JWT_EXPIRE: 1d
-    
-    - name: Run Frontend Tests
-      run: npm test --prefix frontend -- --watchAll=false
-    
-    - name: Upload Test Coverage
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Restore cached dependencies
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            **/node_modules
+          key: ${{ env.CACHE_NPM_DEPS }}
+      
+      - name: Install Dependencies (if cache miss)
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          npm ci --prefix backend
+          npm ci --prefix frontend
+      
+      - name: Run Backend Tests
+        run: npm test --prefix backend
+        env:
+          NODE_ENV: test
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: property_mapping_test
+          MONGO_URI: mongodb://localhost:27017/property-mapping-test
+          JWT_SECRET: test_jwt_secret
+          JWT_EXPIRE: 1d
+      
+      - name: Run Frontend Tests
+        run: npm test --prefix frontend -- --watchAll=false --coverage
+      
+      - name: Upload Test Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./backend/coverage/lcov.info,./frontend/coverage/lcov.info
+          flags: backend,frontend
+          fail_ci_if_error: false
 
   build:
     name: Build
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16.x
-        cache: 'npm'
-    
-    - name: Install Dependencies
-      run: |
-        npm ci
-        npm ci --prefix backend
-        npm ci --prefix frontend
-    
-    - name: Build Frontend
-      run: npm run build --prefix frontend
-      env:
-        CI: false
-    
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: frontend-build
-        path: frontend/build
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Restore cached dependencies
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            **/node_modules
+          key: ${{ env.CACHE_NPM_DEPS }}
+      
+      - name: Install Dependencies (if cache miss)
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          npm ci --prefix backend
+          npm ci --prefix frontend
+      
+      - name: Build Backend
+        run: npm run build --prefix backend
+      
+      - name: Build Frontend
+        run: npm run build --prefix frontend
+        env:
+          CI: false
+          REACT_APP_API_URL: /api
+      
+      - name: Upload Backend Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: backend/dist
+          retention-days: 3
+      
+      - name: Upload Frontend Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build
+          retention-days: 3
 
   deploy-staging:
     name: Deploy to Staging
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
+    if: (github.ref == 'refs/heads/develop' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://property-mapping-staging.herokuapp.com
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Download Build Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: frontend-build
-        path: frontend/build
-    
-    - name: Deploy to Heroku (Staging)
-      uses: akhileshns/heroku-deploy@v3.12.14
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: "property-mapping-staging"
-        heroku_email: ${{ secrets.HEROKU_EMAIL }}
-        procfile: "web: npm start"
-      env:
-        HD_NODE_ENV: staging
-        HD_MONGO_URI: ${{ secrets.STAGING_MONGO_URI }}
-        HD_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
-        HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
-        HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+      - uses: actions/checkout@v4
+      
+      - name: Download Backend Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: backend/dist
+      
+      - name: Download Frontend Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build
+      
+      - name: Setup Database Migrations
+        run: |
+          cp -r database/migrations backend/dist/migrations
+      
+      - name: Deploy to Heroku (Staging)
+        uses: akhileshns/heroku-deploy@v3.12.14
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "property-mapping-staging"
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          procfile: "web: npm start"
+          healthcheck: "https://property-mapping-staging.herokuapp.com/api/health"
+          rollbackonhealthcheckfailed: true
+        env:
+          HD_NODE_ENV: staging
+          HD_DB_USER: ${{ secrets.STAGING_DB_USER }}
+          HD_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          HD_DB_HOST: ${{ secrets.STAGING_DB_HOST }}
+          HD_DB_PORT: ${{ secrets.STAGING_DB_PORT }}
+          HD_DB_NAME: ${{ secrets.STAGING_DB_NAME }}
+          HD_MONGO_URI: ${{ secrets.STAGING_MONGO_URI }}
+          HD_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+          HD_JWT_EXPIRE: 7d
+          HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
+          HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+      
+      - name: Run Database Migrations
+        run: |
+          curl -X POST https://property-mapping-staging.herokuapp.com/api/admin/run-migrations \
+          -H "Authorization: Bearer ${{ secrets.MIGRATION_API_KEY }}" \
+          -H "Content-Type: application/json"
+      
+      - name: Notify Slack on Success
+        if: success()
+        uses: rtCamp/action-slack-notify@v3
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: good
+          SLACK_TITLE: Staging Deployment Successful
+          SLACK_MESSAGE: Property Mapping app has been successfully deployed to staging environment
+          SLACK_FOOTER: GitHub Actions CI/CD
 
   deploy-production:
     name: Deploy to Production
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://property-mapping-production.herokuapp.com
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Download Build Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: frontend-build
-        path: frontend/build
-    
-    - name: Deploy to Heroku (Production)
-      uses: akhileshns/heroku-deploy@v3.12.14
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: "property-mapping-production"
-        heroku_email: ${{ secrets.HEROKU_EMAIL }}
-        procfile: "web: npm start"
-      env:
-        HD_NODE_ENV: production
-        HD_MONGO_URI: ${{ secrets.PRODUCTION_MONGO_URI }}
-        HD_JWT_SECRET: ${{ secrets.PRODUCTION_JWT_SECRET }}
-        HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
-        HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+      - uses: actions/checkout@v4
+      
+      - name: Download Backend Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: backend/dist
+      
+      - name: Download Frontend Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build
+      
+      - name: Setup Database Migrations
+        run: |
+          cp -r database/migrations backend/dist/migrations
+      
+      - name: Deploy to Heroku (Production)
+        uses: akhileshns/heroku-deploy@v3.12.14
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "property-mapping-production"
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          procfile: "web: npm start"
+          healthcheck: "https://property-mapping-production.herokuapp.com/api/health"
+          rollbackonhealthcheckfailed: true
+        env:
+          HD_NODE_ENV: production
+          HD_DB_USER: ${{ secrets.PRODUCTION_DB_USER }}
+          HD_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          HD_DB_HOST: ${{ secrets.PRODUCTION_DB_HOST }}
+          HD_DB_PORT: ${{ secrets.PRODUCTION_DB_PORT }}
+          HD_DB_NAME: ${{ secrets.PRODUCTION_DB_NAME }}
+          HD_MONGO_URI: ${{ secrets.PRODUCTION_MONGO_URI }}
+          HD_JWT_SECRET: ${{ secrets.PRODUCTION_JWT_SECRET }}
+          HD_JWT_EXPIRE: 7d
+          HD_HERE_API_KEY: ${{ secrets.HERE_API_KEY }}
+          HD_WEALTH_ENGINE_API_KEY: ${{ secrets.WEALTH_ENGINE_API_KEY }}
+      
+      - name: Run Database Migrations
+        run: |
+          curl -X POST https://property-mapping-production.herokuapp.com/api/admin/run-migrations \
+          -H "Authorization: Bearer ${{ secrets.MIGRATION_API_KEY }}" \
+          -H "Content-Type: application/json"
+      
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            Production deployment from commit ${{ github.sha }}
+            
+            Changes included in this release:
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+      
+      - name: Notify Slack on Success
+        if: success()
+        uses: rtCamp/action-slack-notify@v3
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: good
+          SLACK_TITLE: Production Deployment Successful
+          SLACK_MESSAGE: Property Mapping app has been successfully deployed to production environment
+          SLACK_FOOTER: GitHub Actions CI/CD
