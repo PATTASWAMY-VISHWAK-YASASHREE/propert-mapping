@@ -1,4 +1,4 @@
-# AI Face Swapper with Chat System
+# property-mapping with Chat System
 
 This project includes a dedicated chat server implementation to avoid routing errors and stack overflow issues.
 
@@ -27,7 +27,7 @@ Create a `.env` file in the root directory:
 
 ```
 DB_USER=postgres
-DB_PASSWORD=vishwak
+DB_PASSWORD="password"
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=property_mapping
