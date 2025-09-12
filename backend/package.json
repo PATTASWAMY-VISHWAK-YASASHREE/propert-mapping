@@ -16,7 +16,7 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.12.0",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
